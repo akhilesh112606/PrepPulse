@@ -1,8 +1,10 @@
 import sqlite3
+import hashlib
 from pathlib import Path
 
 
 def init_db(app):
+    """Create necessary tables in the SQLite database."""
     db_path = Path(app.config["DATABASE"])
     db_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -14,7 +16,7 @@ def init_db(app):
                 full_name TEXT NOT NULL,
                 email TEXT NOT NULL UNIQUE,
                 password_hash TEXT NOT NULL,
-                created_at TEXT NOT NULL DEFAULT (datetime('now'))
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
             """
         )
@@ -24,8 +26,8 @@ def init_db(app):
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 email TEXT NOT NULL UNIQUE,
                 completed INTEGER NOT NULL DEFAULT 0,
-                created_at TEXT NOT NULL DEFAULT (datetime('now')),
-                updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
             """
         )
@@ -40,7 +42,7 @@ def init_db(app):
                 interview_ready INTEGER NOT NULL,
                 consistency INTEGER NOT NULL,
                 overall_score REAL NOT NULL,
-                created_at TEXT NOT NULL DEFAULT (datetime('now'))
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
             """
         )
@@ -50,8 +52,8 @@ def init_db(app):
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 email TEXT NOT NULL UNIQUE,
                 data TEXT NOT NULL,
-                created_at TEXT NOT NULL DEFAULT (datetime('now')),
-                updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
             """
         )
@@ -66,8 +68,8 @@ def init_db(app):
                 max_score REAL NOT NULL,
                 date_taken TEXT NOT NULL,
                 notes TEXT,
-                created_at TEXT NOT NULL DEFAULT (datetime('now')),
-                updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
             """
         )
@@ -81,8 +83,8 @@ def init_db(app):
                 file_content TEXT,
                 analysis_data TEXT,
                 ats_score REAL,
-                created_at TEXT NOT NULL DEFAULT (datetime('now')),
-                updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
             """
         )
@@ -94,7 +96,7 @@ def init_db(app):
                 name TEXT NOT NULL,
                 color TEXT NOT NULL DEFAULT '#FF6B35',
                 position INTEGER NOT NULL DEFAULT 0,
-                created_at TEXT NOT NULL DEFAULT (datetime('now'))
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
             """
         )
@@ -111,10 +113,84 @@ def init_db(app):
             )
             """
         )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS chat_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                email TEXT NOT NULL,
+                user_message TEXT NOT NULL,
+                assistant_response TEXT NOT NULL,
+                context TEXT,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS resources (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                email TEXT NOT NULL,
+                uploader_name TEXT NOT NULL,
+                title TEXT NOT NULL,
+                subject TEXT NOT NULL,
+                branch TEXT NOT NULL,
+                year_of_engineering TEXT NOT NULL,
+                academic_year TEXT NOT NULL,
+                description TEXT,
+                filename TEXT NOT NULL,
+                file_path TEXT NOT NULL,
+                file_hash TEXT,
+                file_size INTEGER,
+                status TEXT NOT NULL DEFAULT 'pending',
+                uploaded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                reviewed_at TEXT,
+                reviewed_by TEXT
+            )
+            """
+        )
+        # Backfill schema for existing databases.
+        res_columns = {
+            row[1] for row in conn.execute("PRAGMA table_info(resources)").fetchall()
+        }
+        if "file_hash" not in res_columns:
+            conn.execute("ALTER TABLE resources ADD COLUMN file_hash TEXT")
+        if "file_size" not in res_columns:
+            conn.execute("ALTER TABLE resources ADD COLUMN file_size INTEGER")
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_resources_file_hash ON resources(file_hash)"
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS resource_comments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                resource_id INTEGER NOT NULL,
+                commenter_email TEXT NOT NULL,
+                commenter_name TEXT NOT NULL,
+                comment TEXT NOT NULL,
+                is_admin INTEGER NOT NULL DEFAULT 0,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (resource_id) REFERENCES resources(id) ON DELETE CASCADE
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS ai_refinements (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                resource_id INTEGER NOT NULL,
+                user_email TEXT NOT NULL,
+                summary TEXT,
+                questions_data TEXT,
+                status TEXT NOT NULL DEFAULT 'pending',
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                completed_at TEXT,
+                FOREIGN KEY (resource_id) REFERENCES resources(id) ON DELETE CASCADE
+            )
+            """
+        )
         conn.commit()
-
-
 def get_connection(db_path):
+    """Return a sqlite3 connection with Row factory."""
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
@@ -703,3 +779,440 @@ def admin_delete_row(db_path, table_name, row_id):
         cur = conn.execute(f'DELETE FROM "{table_name}" WHERE id = ?', (row_id,))
         conn.commit()
         return cur.rowcount
+
+def save_chat_message(db_path, email, user_message, assistant_response, context=""):
+    """Save a chat message and response to chat history"""
+    with get_connection(db_path) as conn:
+        conn.execute(
+            """
+            INSERT INTO chat_history (email, user_message, assistant_response, context, created_at)
+            VALUES (?, ?, ?, ?, datetime('now'))
+            """,
+            (email, user_message, assistant_response, context)
+        )
+        conn.commit()
+
+
+def get_chat_history(db_path, email, limit=50):
+    """Retrieve chat history for a user (most recent first)"""
+    with get_connection(db_path) as conn:
+        cur = conn.execute(
+            """
+            SELECT id, user_message, assistant_response, context, created_at
+            FROM chat_history
+            WHERE email = ?
+            ORDER BY created_at DESC
+            LIMIT ?
+            """,
+            (email, limit)
+        )
+        return [dict(row) for row in cur.fetchall()]
+
+
+def get_chat_history_paginated(db_path, email, offset=0, limit=20):
+    """Retrieve paginated chat history for a user"""
+    with get_connection(db_path) as conn:
+        cur = conn.execute(
+            """
+            SELECT id, user_message, assistant_response, context, created_at
+            FROM chat_history
+            WHERE email = ?
+            ORDER BY created_at DESC
+            LIMIT ? OFFSET ?
+            """,
+            (email, limit, offset)
+        )
+        return [dict(row) for row in cur.fetchall()]
+
+
+def delete_chat_history(db_path, email):
+    """Delete all chat history for a user"""
+    with get_connection(db_path) as conn:
+        cur = conn.execute("DELETE FROM chat_history WHERE email = ?", (email,))
+        conn.commit()
+        return cur.rowcount
+
+
+def delete_chat_message(db_path, message_id):
+    """Delete a specific chat message"""
+    with get_connection(db_path) as conn:
+        cur = conn.execute("DELETE FROM chat_history WHERE id = ?", (message_id,))
+        conn.commit()
+        return cur.rowcount
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Resources (Notes Platform)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def create_resource(db_path, email, uploader_name, title, subject, branch,
+                    year_of_engineering, academic_year, description, filename, file_path,
+                    file_hash=None, file_size=None):
+    with get_connection(db_path) as conn:
+        cur = conn.execute(
+            """
+            INSERT INTO resources
+            (email, uploader_name, title, subject, branch, year_of_engineering,
+             academic_year, description, filename, file_path, file_hash, file_size)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (email, uploader_name, title, subject, branch,
+             year_of_engineering, academic_year, description, filename, file_path,
+             file_hash, file_size),
+        )
+        conn.commit()
+        return cur.lastrowid
+
+
+def get_resource_by_hash(db_path, file_hash):
+    if not file_hash:
+        return None
+    with get_connection(db_path) as conn:
+        # Backfill hashes for legacy rows that were created before hash support.
+        missing_rows = conn.execute(
+            """
+            SELECT id, file_path
+            FROM resources
+            WHERE status IN ('approved', 'pending')
+              AND (file_hash IS NULL OR file_hash = '')
+            """
+        ).fetchall()
+
+        for row in missing_rows:
+            try:
+                p = Path(row["file_path"])
+                if not p.exists() or not p.is_file():
+                    continue
+                data = p.read_bytes()
+                if not data:
+                    continue
+                computed_hash = hashlib.sha256(data).hexdigest()
+                conn.execute(
+                    "UPDATE resources SET file_hash = ?, file_size = ? WHERE id = ?",
+                    (computed_hash, len(data), row["id"]),
+                )
+            except Exception:
+                # Ignore unreadable files and keep processing others.
+                continue
+
+        conn.commit()
+
+        cur = conn.execute(
+            """
+            SELECT * FROM resources
+            WHERE file_hash = ? AND status IN ('approved', 'pending')
+            ORDER BY uploaded_at DESC
+            LIMIT 1
+            """,
+            (file_hash,),
+        )
+        row = cur.fetchone()
+        return dict(row) if row else None
+
+
+def list_approved_resources(db_path, branch=None, year=None, subject=None):
+    with get_connection(db_path) as conn:
+        query = "SELECT * FROM resources WHERE status = 'approved'"
+        params = []
+        if branch:
+            query += " AND branch = ?"
+            params.append(branch)
+        if year:
+            query += " AND year_of_engineering = ?"
+            params.append(year)
+        if subject:
+            query += " AND subject LIKE ?"
+            params.append(f"%{subject}%")
+        query += " ORDER BY uploaded_at DESC"
+        cur = conn.execute(query, params)
+        return [dict(r) for r in cur.fetchall()]
+
+
+def list_pending_resources(db_path):
+    with get_connection(db_path) as conn:
+        cur = conn.execute(
+            "SELECT * FROM resources WHERE status = 'pending' ORDER BY uploaded_at DESC"
+        )
+        return [dict(r) for r in cur.fetchall()]
+
+
+def list_pending_resources_paginated(db_path, page=1, page_size=3):
+    page = max(1, int(page or 1))
+    page_size = max(1, int(page_size or 3))
+    offset = (page - 1) * page_size
+
+    with get_connection(db_path) as conn:
+        total = conn.execute(
+            "SELECT COUNT(*) FROM resources WHERE status = 'pending'"
+        ).fetchone()[0]
+        cur = conn.execute(
+            """
+            SELECT *
+            FROM resources
+            WHERE status = 'pending'
+            ORDER BY uploaded_at DESC
+            LIMIT ? OFFSET ?
+            """,
+            (page_size, offset),
+        )
+        items = [dict(r) for r in cur.fetchall()]
+
+    total_pages = (total + page_size - 1) // page_size if total else 1
+    return {
+        "items": items,
+        "pagination": {
+            "page": page,
+            "page_size": page_size,
+            "total_items": total,
+            "total_pages": total_pages,
+            "has_prev": page > 1,
+            "has_next": page < total_pages,
+        },
+    }
+
+
+def list_approved_resources_paginated(db_path, page=1, page_size=5):
+    page = max(1, int(page or 1))
+    page_size = max(1, int(page_size or 5))
+    offset = (page - 1) * page_size
+
+    with get_connection(db_path) as conn:
+        total = conn.execute(
+            "SELECT COUNT(*) FROM resources WHERE status = 'approved'"
+        ).fetchone()[0]
+        cur = conn.execute(
+            """
+            SELECT *
+            FROM resources
+            WHERE status = 'approved'
+            ORDER BY reviewed_at DESC, uploaded_at DESC
+            LIMIT ? OFFSET ?
+            """,
+            (page_size, offset),
+        )
+        items = [dict(r) for r in cur.fetchall()]
+
+    total_pages = (total + page_size - 1) // page_size if total else 1
+    return {
+        "items": items,
+        "pagination": {
+            "page": page,
+            "page_size": page_size,
+            "total_items": total,
+            "total_pages": total_pages,
+            "has_prev": page > 1,
+            "has_next": page < total_pages,
+        },
+    }
+
+
+def list_user_resources(db_path, email):
+    with get_connection(db_path) as conn:
+        cur = conn.execute(
+            "SELECT * FROM resources WHERE email = ? ORDER BY uploaded_at DESC",
+            (email,),
+        )
+        return [dict(r) for r in cur.fetchall()]
+
+
+def approve_resource(db_path, resource_id, admin_email):
+    with get_connection(db_path) as conn:
+        conn.execute(
+            "UPDATE resources SET status = 'approved', reviewed_at = datetime('now'), reviewed_by = ? WHERE id = ?",
+            (admin_email, resource_id),
+        )
+        conn.commit()
+
+
+def reject_resource(db_path, resource_id, admin_email):
+    with get_connection(db_path) as conn:
+        conn.execute(
+            "UPDATE resources SET status = 'rejected', reviewed_at = datetime('now'), reviewed_by = ? WHERE id = ?",
+            (admin_email, resource_id),
+        )
+        conn.commit()
+
+
+def get_resource_by_id(db_path, resource_id):
+    with get_connection(db_path) as conn:
+        cur = conn.execute("SELECT * FROM resources WHERE id = ?", (resource_id,))
+        row = cur.fetchone()
+        return dict(row) if row else None
+
+
+def delete_resource(db_path, resource_id, email):
+    with get_connection(db_path) as conn:
+        cur = conn.execute(
+            "DELETE FROM resources WHERE id = ? AND email = ?",
+            (resource_id, email),
+        )
+        conn.commit()
+        return cur.rowcount
+
+
+def get_resource_stats(db_path):
+    with get_connection(db_path) as conn:
+        total = conn.execute("SELECT COUNT(*) FROM resources").fetchone()[0]
+        approved = conn.execute("SELECT COUNT(*) FROM resources WHERE status = 'approved'").fetchone()[0]
+        pending = conn.execute("SELECT COUNT(*) FROM resources WHERE status = 'pending'").fetchone()[0]
+        return {"total": total, "approved": approved, "pending": pending}
+
+
+def update_resource(db_path, resource_id, email, title, subject, branch,
+                    year_of_engineering, academic_year, description,
+                    filename=None, file_path=None, file_hash=None, file_size=None):
+    with get_connection(db_path) as conn:
+        if filename and file_path:
+            conn.execute(
+                """UPDATE resources
+                   SET title=?, subject=?, branch=?, year_of_engineering=?,
+                       academic_year=?, description=?, filename=?, file_path=?,
+                       file_hash=?, file_size=?,
+                       status='pending', reviewed_at=NULL, reviewed_by=NULL
+                   WHERE id=? AND email=?""",
+                (title, subject, branch, year_of_engineering, academic_year,
+                 description, filename, file_path, file_hash, file_size,
+                 resource_id, email),
+            )
+        else:
+            conn.execute(
+                """UPDATE resources
+                   SET title=?, subject=?, branch=?, year_of_engineering=?,
+                       academic_year=?, description=?,
+                       status='pending', reviewed_at=NULL, reviewed_by=NULL
+                   WHERE id=? AND email=?""",
+                (title, subject, branch, year_of_engineering, academic_year,
+                 description, resource_id, email),
+            )
+        conn.commit()
+
+
+def admin_update_resource_details(
+    db_path,
+    resource_id,
+    title,
+    subject,
+    branch,
+    year_of_engineering,
+    academic_year,
+    description,
+):
+    with get_connection(db_path) as conn:
+        cur = conn.execute(
+            """
+            UPDATE resources
+            SET title=?, subject=?, branch=?, year_of_engineering=?,
+                academic_year=?, description=?, reviewed_at=datetime('now')
+            WHERE id=? AND status='approved'
+            """,
+            (
+                title,
+                subject,
+                branch,
+                year_of_engineering,
+                academic_year,
+                description,
+                resource_id,
+            ),
+        )
+        conn.commit()
+        return cur.rowcount
+
+
+def admin_delete_resource(db_path, resource_id):
+    with get_connection(db_path) as conn:
+        cur = conn.execute(
+            "DELETE FROM resources WHERE id = ? AND status = 'approved'",
+            (resource_id,),
+        )
+        conn.commit()
+        return cur.rowcount
+
+
+def add_resource_comment(db_path, resource_id, commenter_email, commenter_name,
+                         comment, is_admin=False):
+    with get_connection(db_path) as conn:
+        cur = conn.execute(
+            """INSERT INTO resource_comments
+               (resource_id, commenter_email, commenter_name, comment, is_admin)
+               VALUES (?, ?, ?, ?, ?)""",
+            (resource_id, commenter_email, commenter_name, comment, 1 if is_admin else 0),
+        )
+        conn.commit()
+        return cur.lastrowid
+
+
+def get_resource_comments(db_path, resource_id):
+    with get_connection(db_path) as conn:
+        cur = conn.execute(
+            "SELECT * FROM resource_comments WHERE resource_id = ? ORDER BY created_at ASC",
+            (resource_id,),
+        )
+        return [dict(r) for r in cur.fetchall()]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# AI Refinements
+# ─────────────────────────────────────────────────────────────────────────────
+
+def create_ai_refinement(db_path, resource_id, user_email):
+    """Create a new AI refinement request."""
+    with get_connection(db_path) as conn:
+        cur = conn.execute(
+            """INSERT INTO ai_refinements (resource_id, user_email, status)
+               VALUES (?, ?, 'pending')""",
+            (resource_id, user_email),
+        )
+        conn.commit()
+        return cur.lastrowid
+
+
+def get_ai_refinement(db_path, refinement_id):
+    """Get AI refinement by ID."""
+    with get_connection(db_path) as conn:
+        cur = conn.execute(
+            "SELECT * FROM ai_refinements WHERE id = ?",
+            (refinement_id,),
+        )
+        row = cur.fetchone()
+        return dict(row) if row else None
+
+
+def get_ai_refinement_by_resource(db_path, resource_id, user_email):
+    """Get the latest AI refinement for a resource by a user."""
+    with get_connection(db_path) as conn:
+        cur = conn.execute(
+            """SELECT * FROM ai_refinements 
+               WHERE resource_id = ? AND user_email = ?
+               ORDER BY id DESC LIMIT 1""",
+            (resource_id, user_email),
+        )
+        row = cur.fetchone()
+        return dict(row) if row else None
+
+
+def update_ai_refinement(db_path, refinement_id, summary, questions_data, status='completed'):
+    """Update AI refinement with results."""
+    with get_connection(db_path) as conn:
+        conn.execute(
+            """UPDATE ai_refinements 
+               SET summary = ?, questions_data = ?, status = ?, 
+                   completed_at = datetime('now')
+               WHERE id = ?""",
+            (summary, questions_data, status, refinement_id),
+        )
+        conn.commit()
+
+
+def list_user_ai_refinements(db_path, user_email):
+    """List all AI refinements for a user."""
+    with get_connection(db_path) as conn:
+        cur = conn.execute(
+            """SELECT ar.*, r.title as resource_title, r.subject as resource_subject
+               FROM ai_refinements ar
+               JOIN resources r ON ar.resource_id = r.id
+               WHERE ar.user_email = ?
+               ORDER BY ar.created_at DESC""",
+            (user_email,),
+        )
+        return [dict(r) for r in cur.fetchall()]

@@ -1,0 +1,90 @@
+{
+  "certifications": [
+    {
+      "certification_id": "CERT001",
+      "title": "Computer Science Fundamentals Certificate",
+      "course_id": "CS101",
+      "issuing_organization": "Vprep Academy",
+      "description": "Demonstrates foundational knowledge of computer science and programming",
+      "requirements": {
+        "courses_required": ["CS101"],
+        "minimum_gpa": 2.5,
+        "assessments_required": ["ASS001", "ASS002"],
+        "completion_percentage": 85
+      },
+      "badge_url": "/static/badges/cs-fundamentals.svg",
+      "validity_months": 24,
+      "skills_covered": [
+        "Programming Basics",
+        "Variables and Data Types",
+        "Control Flow",
+        "Functions",
+        "Algorithm Design"
+      ]
+    },
+    {
+      "certification_id": "CERT002",
+      "title": "Web Development Professional Certificate",
+      "course_id": "WEB201",
+      "issuing_organization": "Vprep Academy",
+      "description": "Professional certification in modern web development practices",
+      "requirements": {
+        "courses_required": ["WEB201"],
+        "minimum_gpa": 3.0,
+        "assessments_required": ["ASS003"],
+        "completion_percentage": 90
+      },
+      "badge_url": "/static/badges/web-dev-pro.svg",
+      "validity_months": 36,
+      "skills_covered": [
+        "HTML5",
+        "CSS3",
+        "JavaScript",
+        "Responsive Design",
+        "Web Performance"
+      ]
+    },
+    {
+      "certification_id": "CERT003",
+      "title": "Data Science Practitioner Certificate",
+      "course_id": "DATA301",
+      "issuing_organization": "Vprep Academy",
+      "description": "Foundation certification in data science and analytics",
+      "requirements": {
+        "courses_required": ["DATA301"],
+        "minimum_gpa": 2.8,
+        "assessments_required": ["ASS004"],
+        "completion_percentage": 85
+      },
+      "badge_url": "/static/badges/data-science.svg",
+      "validity_months": 24,
+      "skills_covered": [
+        "Data Analysis",
+        "Data Visualization",
+        "Statistical Analysis",
+        "Python for Data Science",
+        "Machine Learning Basics"
+      ]
+    },
+    {
+      "certification_id": "CERT004",
+      "title": "Full Stack Development Mastery",
+      "parent_certification": true,
+      "description": "Advanced certification requiring completion of multiple pathways",
+      "requirements": {
+        "courses_required": ["CS101", "WEB201"],
+        "certifications_required": ["CERT001", "CERT002"],
+        "minimum_gpa": 3.2,
+        "completion_percentage": 90
+      },
+      "badge_url": "/static/badges/full-stack-master.svg",
+      "validity_months": 48
+    }
+  ],
+  "metadata": {
+    "total_certifications": 4,
+    "issuing_organization": "Vprep Academy",
+    "last_updated": "2026-02-28",
+    "verification_enabled": true
+  }
+}

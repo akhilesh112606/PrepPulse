@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Mindmap - PrepPulse</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/youtube-mindmap.css') }}">
+</head>
+<body class="page-fade page-fade-ready dashboard-page">
+    <main class="auth-page">
+        <spline-viewer url="https://prod.spline.design/fXcrKO8RVlhTuX6A/scene.splinecode"></spline-viewer>
+        <div class="auth-brand">PrepPulse</div>
+
+        <nav class="dash-navbar">
+            <div class="dash-navbar-inner">
+                <span class="dash-nav-brand">PrepPulse</span>
+                <div class="dash-nav-links">
+                    <a href="{{ url_for('main.dashboard') }}" class="dash-nav-link" data-nav-link>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                        Skill Checklist
+                    </a>
+                    <a href="{{ url_for('main.progress_page') }}" class="dash-nav-link" data-nav-link>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14l2 2 4-4"/></svg>
+                        Progress Tracker
+                    </a>
+                    <a href="{{ url_for('main.note_maker_page') }}" class="dash-nav-link" data-nav-link>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2"/><path d="M8 14l2 2 4-4"/></svg>
+                        Instant Note Maker
+                    </a>
+                    <a href="{{ url_for('main.resources_page') }}" class="dash-nav-link" data-nav-link>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="12" y2="14"/><line x1="8" y1="10" x2="16" y2="10"/></svg>
+                        Resources
+                    </a>
+                    <a href="{{ url_for('main.youtube_mindmap_page') }}" class="dash-nav-link active" data-nav-link>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7.5a2.5 2.5 0 0 0-1.8-1.8C17.5 5.2 12 5.2 12 5.2s-5.5 0-7.2.5A2.5 2.5 0 0 0 3 7.5 26.6 26.6 0 0 0 2.5 12c0 1.5.2 3 .5 4.5a2.5 2.5 0 0 0 1.8 1.8c1.7.5 7.2.5 7.2.5s5.5 0 7.2-.5a2.5 2.5 0 0 0 1.8-1.8c.3-1.5.5-3 .5-4.5 0-1.5-.2-3-.5-4.5z"/><polygon points="10 15.3 15.5 12 10 8.7 10 15.3"/></svg>
+                        YT Mindmap
+                    </a>
+                </div>
+                <a href="{{ url_for('main.logout') }}" class="dash-nav-logout" title="Logout">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Logout
+                </a>
+            </div>
+        </nav>
+
+        <div class="auth-shell yt-shell">
+            <section class="auth-left yt-intro">
+                <p class="auth-kicker">Visual Learning</p>
+                <h1 class="auth-title">YouTube Mindmap</h1>
+                <p class="auth-lead">Paste a YouTube video URL and instantly generate an AI-powered Mermaid mindmap to revise concepts faster.</p>
+
+                <div class="yt-form-card">
+                    <form id="yt-mindmap-form" class="yt-form">
+                        <div class="form-alert" id="yt-alert" hidden></div>
+                        <div class="form-group">
+                            <label for="youtube-url">YouTube Video URL</label>
+                            <input id="youtube-url" name="youtube_url" type="url" placeholder="https://www.youtube.com/watch?v=..." required>
+                        </div>
+                        <button type="submit" id="generate-mindmap-btn" class="btn-submit yt-submit-btn">
+                            <span class="btn-text">Generate Mindmap</span>
+                            <span class="btn-loader" hidden></span>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="yt-tip-card">
+                    <h3>Quick Tips</h3>
+                    <ul>
+                        <li>Use English videos for best transcript quality.</li>
+                        <li>Long videos are auto-trimmed for stable generation.</li>
+                        <li>Open Mermaid Live to edit structure before sharing.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="auth-card yt-result-card">
+                <div class="card-header yt-header">
+                    <div class="header-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12s4-8 10-8 10 8 10 8-4 8-10 8-10-8-10-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </div>
+                    <div class="header-text">
+                        <p class="card-eyebrow">Generated Output</p>
+                        <h2 class="card-title">Mindmap Preview</h2>
+                        <p class="card-subtitle">Review Mermaid code, preview image, and export quickly.</p>
+                    </div>
+                </div>
+
+                <div class="yt-meta-grid">
+                    <div class="meta-item">
+                        <span class="meta-label">Video</span>
+                        <span id="meta-video-title" class="meta-value">No video yet</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Transcript Chars</span>
+                        <span id="meta-char-count" class="meta-value">0</span>
+                    </div>
+                </div>
+
+                <div class="yt-preview-wrap" id="yt-preview-wrap" hidden>
+                    <div class="yt-preview-header">
+                        <h3>Mindmap Image</h3>
+                        <div class="preview-actions">
+                            <a id="open-svg-link" class="btn-mini" target="_blank" rel="noopener">Open SVG</a>
+                            <a id="open-editor-link" class="btn-mini" target="_blank" rel="noopener">Open Editor</a>
+                        </div>
+                    </div>
+                    <img id="mindmap-image" class="mindmap-image" alt="Generated Mermaid mindmap preview">
+                </div>
+
+                <div class="yt-code-wrap" id="yt-code-wrap" hidden>
+                    <div class="code-header">
+                        <h3>Mermaid Code</h3>
+                        <button id="copy-mermaid-btn" class="btn-mini" type="button">Copy Code</button>
+                    </div>
+                    <pre id="mermaid-code" class="mermaid-code-block"></pre>
+                </div>
+
+                <div class="yt-empty" id="yt-empty-state">
+                    <div class="empty-icon">
+                        <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M21 7.5a2.5 2.5 0 0 0-1.8-1.8C17.5 5.2 12 5.2 12 5.2s-5.5 0-7.2.5A2.5 2.5 0 0 0 3 7.5 26.6 26.6 0 0 0 2.5 12c0 1.5.2 3 .5 4.5a2.5 2.5 0 0 0 1.8 1.8c1.7.5 7.2.5 7.2.5s5.5 0 7.2-.5a2.5 2.5 0 0 0 1.8-1.8c.3-1.5.5-3 .5-4.5 0-1.5-.2-3-.5-4.5z"/><polygon points="10 15.3 15.5 12 10 8.7 10 15.3"/></svg>
+                    </div>
+                    <div class="empty-text">Paste a YouTube URL to begin</div>
+                    <div class="empty-hint">Your generated mindmap will appear here.</div>
+                </div>
+            </section>
+        </div>
+
+        <div class="preppulse-badge">
+            <span class="live-indicator"></span>
+            <span class="badge-text">PrepPulse</span>
+        </div>
+    </main>
+
+    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.51/build/spline-viewer.js"></script>
+    <script src="{{ url_for('static', filename='js/youtube-mindmap.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/page-transition.js') }}"></script>
+</body>
+</html>

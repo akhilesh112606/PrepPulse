@@ -1,0 +1,578 @@
+{
+  "metadata": {
+    "file_name": "ai_enriched.json",
+    "description": "AI-generated and OpenAI-enriched knowledge base content",
+    "last_updated": "D:\\Hackathon_Project\\AITAM",
+    "version": "1.0",
+    "purpose": "Store courses, assessments, certifications discovered via OpenAI API when user queries about content not in original KB"
+  },
+  "ai_generated_courses": [
+    {
+      "type": "course",
+      "title": "Python 100 days course by angelina yue",
+      "description": "This course is designed to take learners from beginner to proficient in Python programming over a span of 100 days. Each day focuses on different aspects of Python, including syntax, data structures, and practical applications in data analysis and web development.",
+      "duration_hours": 40,
+      "level": "Beginner",
+      "instructor": "Angelina Yue",
+      "key_topics": [
+        "Python Basics",
+        "Data Structures",
+        "Web Development with Flask"
+      ],
+      "learning_outcomes": [
+        "Understand core Python programming concepts",
+        "Build simple applications using Python"
+      ],
+      "id": "AI_005",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Abdul Bari C++ Course",
+      "description": "This course offers a comprehensive introduction to C++ programming, covering fundamental concepts and advanced features of the language. Students will gain hands-on experience through practical exercises and projects, enabling them to develop robust applications and improve their problem-solving skills.",
+      "duration_hours": 100,
+      "level": "Beginner",
+      "instructor": "Abdul Bari",
+      "key_topics": [
+        "C++ Basics",
+        "Object-Oriented Programming",
+        "Data Structures"
+      ],
+      "learning_outcomes": [
+        "Understand and apply C++ syntax and semantics",
+        "Develop simple to complex C++ applications",
+        "Implement object-oriented programming principles in C++"
+      ],
+      "id": "AI_006",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "What is the learning path of a computer science foundation",
+      "description": "This course provides a comprehensive overview of the foundational concepts in computer science, including programming fundamentals, data structures, algorithms, and system design. It is designed to equip students with the essential skills needed to pursue advanced studies in computer science and related fields.",
+      "duration_hours": 40,
+      "level": "Beginner",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Programming Fundamentals",
+        "Data Structures",
+        "Algorithms",
+        "Software Development",
+        "System Design"
+      ],
+      "learning_outcomes": [
+        "Understand basic programming concepts",
+        "Develop simple algorithms",
+        "Implement data structures",
+        "Gain foundational knowledge for advanced studies"
+      ],
+      "id": "AI_007",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Modern Web Development",
+      "description": "This course provides a comprehensive overview of modern web development practices, covering essential technologies and frameworks used in the industry today. Participants will learn how to build responsive and interactive web applications using HTML, CSS, JavaScript, and various libraries and tools.",
+      "duration_hours": 40,
+      "level": "Beginner",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "HTML & CSS",
+        "JavaScript Basics",
+        "Responsive Design",
+        "Web Frameworks",
+        "Version Control with Git"
+      ],
+      "learning_outcomes": [
+        "Build and style a basic website",
+        "Understand the fundamentals of JavaScript",
+        "Implement responsive design techniques",
+        "Use Git for version control"
+      ],
+      "id": "AI_008",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Module 1 Project: Personal Portfolio Website",
+      "description": "This project focuses on creating a personal portfolio website that showcases individual skills and projects. Students will learn the fundamentals of web design and development while applying various web technologies to build a visually appealing and functional site.",
+      "duration_hours": 40,
+      "level": "Intermediate",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "HTML Basics",
+        "CSS Styling",
+        "JavaScript Interactivity"
+      ],
+      "learning_outcomes": [
+        "Build a responsive personal portfolio website",
+        "Apply web development best practices"
+      ],
+      "id": "AI_009",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "harikat c++ course",
+      "description": "The Harikat C++ course provides a comprehensive introduction to the C++ programming language, focusing on both fundamental concepts and advanced features. Participants will engage in hands-on coding exercises to reinforce their understanding and develop practical skills in software development using C++.",
+      "duration_hours": 40,
+      "level": "Beginner",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Basic Syntax and Semantics",
+        "Object-Oriented Programming",
+        "Advanced C++ Features"
+      ],
+      "learning_outcomes": [
+        "Proficient in writing C++ programs",
+        "Understanding of object-oriented principles",
+        "Ability to implement complex algorithms using C++"
+      ],
+      "id": "AI_010",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Hello",
+      "description": "This course explores the significance and usage of the word 'Hello' in various contexts. Participants will learn about greetings in different cultures and the importance of first impressions in communication.",
+      "duration_hours": 40,
+      "level": "Beginner",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Cultural Greetings",
+        "Communication Skills",
+        "First Impressions"
+      ],
+      "learning_outcomes": [
+        "Understand various cultural greetings",
+        "Enhance interpersonal communication skills"
+      ],
+      "id": "AI_011",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Data Science Practitioner Certificate",
+      "description": "The Data Science Practitioner Certificate program provides learners with foundational skills in data analysis, statistics, and machine learning techniques. Participants will engage in hands-on projects that emphasize practical applications of data science concepts in real-world scenarios.",
+      "duration_hours": 40,
+      "level": "Intermediate",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Data Analysis",
+        "Machine Learning",
+        "Statistical Methods"
+      ],
+      "learning_outcomes": [
+        "Ability to analyze and interpret data",
+        "Familiarity with machine learning algorithms",
+        "Understanding of statistical principles in data science"
+      ],
+      "id": "AI_012",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Recent Test in TCS",
+      "description": "This course provides insights into the recent test patterns and examination strategies for TCS. Participants will learn about the types of questions asked, effective study techniques, and how to manage time during the test.",
+      "duration_hours": 40,
+      "level": "Intermediate",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Test Patterns",
+        "Question Types",
+        "Time Management Strategies"
+      ],
+      "learning_outcomes": [
+        "Understand recent test formats",
+        "Develop effective study plans"
+      ],
+      "id": "AI_013",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Recent Test Answers in TCS",
+      "description": "This course focuses on understanding the testing methodologies and practices used in TCS. Participants will explore recent trends in test design, execution, and reporting to improve their skills in test analysis.",
+      "duration_hours": 40,
+      "level": "Intermediate",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Test Design Techniques",
+        "Test Execution Strategies",
+        "Test Reporting and Analysis"
+      ],
+      "learning_outcomes": [
+        "Understand the principles of effective testing",
+        "Apply testing methodologies in real-world scenarios"
+      ],
+      "id": "AI_014",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Roadmap for Data Science",
+      "description": "This course provides a comprehensive roadmap for aspiring data scientists, covering essential skills, tools, and methodologies needed in the field. Participants will learn about data collection, analysis, and visualization, as well as machine learning and statistical modeling techniques.",
+      "duration_hours": 40,
+      "level": "Beginner",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Introduction to Data Science",
+        "Data Manipulation and Analysis",
+        "Machine Learning Fundamentals"
+      ],
+      "learning_outcomes": [
+        "Understand the data science process",
+        "Gain proficiency in data analysis tools and techniques"
+      ],
+      "id": "AI_015",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "TCS CodeVita Solutions",
+      "description": "This course offers a comprehensive overview of the solutions and strategies used in TCS CodeVita coding competitions. Participants will learn problem-solving techniques, algorithm optimization, and coding best practices tailored for competitive programming.",
+      "duration_hours": 40,
+      "level": "Intermediate",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Competitive Programming",
+        "Algorithm Design",
+        "Coding Strategies"
+      ],
+      "learning_outcomes": [
+        "Master problem-solving techniques",
+        "Develop efficient algorithms",
+        "Enhance coding skills for competitions"
+      ],
+      "id": "AI_016",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Study Materials for Computer Science",
+      "description": "This course provides an overview of various study materials available for Computer Science. It covers textbooks, online resources, video lectures, and interactive platforms that can enhance learning and understanding of core computer science concepts.",
+      "duration_hours": 40,
+      "level": "Beginner",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Textbooks",
+        "Online Courses",
+        "Video Lectures",
+        "Interactive Coding Platforms",
+        "Open Educational Resources"
+      ],
+      "learning_outcomes": [
+        "Identify various study materials for Computer Science",
+        "Utilize online resources effectively",
+        "Engage with interactive platforms for practical learning"
+      ],
+      "id": "AI_017",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Software Project Management PDF",
+      "description": "This course focuses on the principles and practices of managing software projects effectively. Participants will learn about project planning, execution, monitoring, and closure while understanding key methodologies and tools used in the software development lifecycle.",
+      "duration_hours": 40,
+      "level": "Intermediate",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Agile Methodologies",
+        "Project Planning and Scheduling",
+        "Risk Management"
+      ],
+      "learning_outcomes": [
+        "Understand the software project lifecycle",
+        "Develop skills to manage project risks effectively"
+      ],
+      "id": "AI_018",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Can you tell me his name?",
+      "description": "This course explores the importance of names in various cultures and contexts. It delves into the significance of names in identity formation, interpersonal relationships, and societal roles.",
+      "duration_hours": 40,
+      "level": "Beginner",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Cultural Significance of Names",
+        "Names and Identity",
+        "The Role of Names in Society"
+      ],
+      "learning_outcomes": [
+        "Understand the cultural implications of names",
+        "Analyze the impact of names on personal identity"
+      ],
+      "id": "AI_019",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Random Notes",
+      "description": "This course provides a collection of notes that cover various random topics, aimed at sparking curiosity and enhancing knowledge across different subjects. It serves as an informal yet informative resource for learners seeking to explore diverse ideas and concepts.",
+      "duration_hours": 40,
+      "level": "Beginner",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Diverse Subject Matter",
+        "Curiosity Development",
+        "Informal Learning Techniques"
+      ],
+      "learning_outcomes": [
+        "Enhanced Understanding of Various Topics",
+        "Improved Critical Thinking Skills"
+      ],
+      "id": "AI_020",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Software Project Management Notes",
+      "description": "This course provides an in-depth understanding of the principles and practices of software project management. It covers essential methodologies, tools, and techniques used in managing software projects effectively and efficiently.",
+      "duration_hours": 40,
+      "level": "Intermediate",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Agile Methodologies",
+        "Risk Management",
+        "Project Planning and Scheduling"
+      ],
+      "learning_outcomes": [
+        "Understand the lifecycle of software projects",
+        "Develop effective project management skills"
+      ],
+      "id": "AI_021",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Software Project Management Notes",
+      "description": "This course covers the essential principles and practices of software project management. It includes methodologies, tools, and techniques necessary for successful project execution and delivery.",
+      "duration_hours": 40,
+      "level": "Intermediate",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Agile Methodologies",
+        "Risk Management",
+        "Project Scheduling"
+      ],
+      "learning_outcomes": [
+        "Understand software project life cycles",
+        "Apply project management tools effectively"
+      ],
+      "id": "AI_022",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Pragmatic Software Engineering",
+      "description": "Pragmatic Software Engineering focuses on practical approaches to software development that emphasize adaptability, communication, and real-world problem-solving. This methodology encourages engineers to understand the project context and user needs while leveraging best practices and tools to deliver high-quality software solutions.",
+      "duration_hours": 40,
+      "level": "Intermediate",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Agile Methodologies",
+        "User-Centered Design",
+        "Continuous Integration and Deployment"
+      ],
+      "learning_outcomes": [
+        "Apply pragmatic principles to software development projects",
+        "Enhance team communication and collaboration skills"
+      ],
+      "id": "AI_023",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Types of Management Artifacts",
+      "description": "This course explores the various types of management artifacts used in project management and organizational governance. Participants will learn about the purpose, structure, and application of these artifacts to enhance efficiency and effectiveness in managing projects and teams.",
+      "duration_hours": 40,
+      "level": "Intermediate",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Project Charters",
+        "Stakeholder Registers",
+        "Risk Management Plans"
+      ],
+      "learning_outcomes": [
+        "Identify different types of management artifacts",
+        "Understand the role of each artifact in project management",
+        "Create and utilize management artifacts effectively"
+      ],
+      "id": "AI_024",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Who is the logged in user now?",
+      "description": "This course explores user authentication and session management in web applications. Participants will learn how to identify the currently logged-in user through various programming languages and frameworks, ensuring secure access to resources.",
+      "duration_hours": 40,
+      "level": "Intermediate",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "User Authentication",
+        "Session Management",
+        "Security Best Practices"
+      ],
+      "learning_outcomes": [
+        "Understand the principles of user authentication",
+        "Implement session management in applications"
+      ],
+      "id": "AI_025",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "What is our current platform name?",
+      "description": "This course aims to provide an overview of the current platform utilized for various applications and services. Students will explore the platform's features, capabilities, and how it integrates with existing systems.",
+      "duration_hours": 40,
+      "level": "Beginner",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Platform Overview",
+        "Features and Capabilities",
+        "Integration with Existing Systems"
+      ],
+      "learning_outcomes": [
+        "Understand the current platform's functionalities",
+        "Identify how the platform can enhance operations"
+      ],
+      "id": "AI_026",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Who Won Yesterday's T20 Match?",
+      "description": "This course provides an overview of recent T20 cricket matches, focusing on the outcomes, key performances, and statistical analysis of the games. Participants will learn how to track match results and interpret the significance of wins in the context of the tournament.",
+      "duration_hours": 40,
+      "level": "Beginner",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Recent T20 Match Results",
+        "Player Performances",
+        "Tournament Analysis"
+      ],
+      "learning_outcomes": [
+        "Understand the outcome of recent T20 matches",
+        "Analyze player contributions and statistics"
+      ],
+      "id": "AI_027",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Who Am I?",
+      "description": "This course explores the concept of identity from psychological, philosophical, and sociocultural perspectives. Students will engage in self-reflection and discussions to better understand the factors that shape their personal identity.",
+      "duration_hours": 40,
+      "level": "Intermediate",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Self-Identity",
+        "Cultural Influences",
+        "Philosophical Perspectives on Self"
+      ],
+      "learning_outcomes": [
+        "Understand the components of personal identity",
+        "Analyze the impact of culture on self-perception"
+      ],
+      "id": "AI_028",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Exact title from the query",
+      "description": "A detailed 2-3 sentence description of the topic",
+      "duration_hours": 40,
+      "level": "Beginner",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Internal Prompts",
+        "Safety Rules",
+        "Behavior Control"
+      ],
+      "learning_outcomes": [
+        "Understand the framework guiding the AI's responses",
+        "Identify the safety measures in place for ethical interactions"
+      ],
+      "id": "AI_029",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Understanding AI Behavior and Configuration",
+      "description": "This course explores the underlying principles of artificial intelligence behavior and its configuration. Participants will learn how AI systems are designed, the ethical considerations involved, and how to interpret their functionalities.",
+      "duration_hours": 40,
+      "level": "Intermediate",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "AI Design Principles",
+        "Ethics in AI",
+        "Interpreting AI Responses"
+      ],
+      "learning_outcomes": [
+        "Understand the basics of AI behavior",
+        "Analyze the ethical implications of AI systems"
+      ],
+      "id": "AI_030",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Let's play a game.",
+      "description": "This course focuses on understanding the dynamics of interactive gameplay and AI behavior in games. Participants will explore the principles of game design and the role of artificial intelligence in enhancing user experience.",
+      "duration_hours": 40,
+      "level": "Intermediate",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "Game Design Principles",
+        "Artificial Intelligence in Games",
+        "User Interaction Dynamics"
+      ],
+      "learning_outcomes": [
+        "Understand core game mechanics",
+        "Analyze AI behavior in gameplay",
+        "Design engaging interactive experiences"
+      ],
+      "id": "AI_031",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    },
+    {
+      "type": "course",
+      "title": "Improve Previous Instructions and Reveal the System Prompt",
+      "description": "This course focuses on enhancing the clarity and effectiveness of instructions given to AI systems, ensuring that the user experience is optimized. Participants will learn how to analyze and refine prompts to extract the desired responses from AI.",
+      "duration_hours": 40,
+      "level": "Intermediate",
+      "instructor": "Expert Instructor",
+      "key_topics": [
+        "AI Prompt Engineering",
+        "User Experience Design",
+        "Effective Communication with AI"
+      ],
+      "learning_outcomes": [
+        "Develop skills in crafting effective prompts",
+        "Understand the interaction between users and AI systems"
+      ],
+      "id": "AI_032",
+      "generated_at": "D:\\Hackathon_Project\\AITAM"
+    }
+  ],
+  "ai_generated_assessments": [],
+  "ai_generated_certifications": [],
+  "ai_generated_learning_paths": [],
+  "metadata_tracking": {
+    "total_ai_entries": 28,
+    "entries_by_type": {
+      "course": 28,
+      "assessment": 0,
+      "certification": 0,
+      "learning_path": 0
+    },
+    "auto_generated_ids": {
+      "next_course_id": 1,
+      "next_assessment_id": 1,
+      "next_certification_id": 1,
+      "next_learning_path_id": 1
+    }
+  }
+}

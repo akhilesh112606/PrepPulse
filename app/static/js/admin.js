@@ -58,14 +58,16 @@
         streaks:  "Streak rankings & habit insights",
         users:    "Manage all registered users",
         database: "Browse & manage tables",
-        query:    "Execute raw SQL queries"
+        query:    "Execute raw SQL queries",
+        resources: "Approve or reject uploaded notes"
     };
     const titles = {
         overview: "Overview",
         streaks:  "Streaks & Ranks",
         users:    "Users",
         database: "Database",
-        query:    "SQL Console"
+        query:    "SQL Console",
+        resources: "Resources"
     };
 
     navItems.forEach(item => {
@@ -89,6 +91,7 @@
         if (name === "streaks")  loadStreaks();
         if (name === "users")    loadUsers();
         if (name === "database") loadTables();
+        if (name === "resources") loadResourcesAdminPanel();
     }
 
     /* ══════════════════════════════════════════════════════════════════════════
@@ -536,6 +539,372 @@
         try { return new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }); }
         catch (_) { return d; }
     }
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       RESOURCES APPROVAL
+       ══════════════════════════════════════════════════════════════════════════ */
+
+    const pendingResourcesList = document.getElementById("pendingResourcesList");
+    const pendingEmpty = document.getElementById("pendingEmpty");
+    const resourcesStats = document.getElementById("resourcesStats");
+
+    const pendingPagination = document.getElementById("pendingPagination");
+    const liveResourcesList = document.getElementById("liveResourcesList");
+    const liveEmpty = document.getElementById("liveEmpty");
+    const livePagination = document.getElementById("livePagination");
+
+    let pendingPage = 1;
+    const pendingPageSize = 3;
+    let livePage = 1;
+    const livePageSize = 5;
+    const liveResourceCache = {};
+
+    async function loadResourcesAdminPanel() {
+        await Promise.all([loadPendingResources(pendingPage), loadLiveResources(livePage)]);
+    }
+
+    async function loadPendingResources(page = 1) {
+        try {
+            const [pendingRes, statsRes] = await Promise.all([
+                fetch(`/api/admin/resources/pending?page=${page}&page_size=${pendingPageSize}`),
+                fetch("/api/admin/resources/stats")
+            ]);
+            const pendingPayload = await pendingRes.json();
+            const stats = await statsRes.json();
+
+            const pending = Array.isArray(pendingPayload)
+                ? pendingPayload
+                : (pendingPayload.items || []);
+            const pendingMeta = pendingPayload.pagination || {
+                page: page,
+                total_pages: 1,
+                has_prev: false,
+                has_next: false,
+            };
+            pendingPage = pendingMeta.page || page;
+
+            // Stats
+            if (resourcesStats) {
+                resourcesStats.innerHTML = `
+                    <div class="glass-card" style="padding:20px;text-align:center;">
+                        <div style="font-size:2rem;font-weight:800;color:#FF6B35;">${stats.pending}</div>
+                        <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Pending</div>
+                    </div>
+                    <div class="glass-card" style="padding:20px;text-align:center;">
+                        <div style="font-size:2rem;font-weight:800;color:#63e6d3;">${stats.approved}</div>
+                        <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Approved</div>
+                    </div>
+                    <div class="glass-card" style="padding:20px;text-align:center;">
+                        <div style="font-size:2rem;font-weight:800;color:#ffd700;">${stats.total}</div>
+                        <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">Total</div>
+                    </div>
+                `;
+            }
+
+            // Pending list
+            if (!pending || pending.length === 0) {
+                if (pendingResourcesList) pendingResourcesList.innerHTML = "";
+                if (pendingEmpty) pendingEmpty.hidden = false;
+                renderPagination(pendingPagination, pendingMeta, (nextPage) => {
+                    loadPendingResources(nextPage);
+                });
+                return;
+            }
+            if (pendingEmpty) pendingEmpty.hidden = true;
+
+            if (pendingResourcesList) {
+                pendingResourcesList.innerHTML = pending.map(r => {
+                    const safeTitle = JSON.stringify(r.title || 'Preview').replace(/"/g, '&quot;');
+                    return `
+                    <div class="pending-resource-item" style="display:flex;flex-direction:column;gap:0;padding:18px 20px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:14px;margin-bottom:10px;">
+                        <div style="display:flex;gap:16px;align-items:center;">
+                            <div style="font-size:1.5rem;">📄</div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-weight:600;color:#fff;font-size:0.95rem;">${esc(r.title)}</div>
+                                <div style="font-size:0.82rem;color:rgba(255,180,140,0.8);margin-top:2px;">${esc(r.subject)}</div>
+                                <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+                                    <span style="padding:2px 8px;font-size:0.68rem;border-radius:5px;background:rgba(99,230,211,0.1);color:#63e6d3;border:1px solid rgba(99,230,211,0.2);font-weight:600;">${esc(r.branch)}</span>
+                                    <span style="padding:2px 8px;font-size:0.68rem;border-radius:5px;background:rgba(255,215,0,0.1);color:#ffd700;border:1px solid rgba(255,215,0,0.2);font-weight:600;">${esc(r.year_of_engineering)}</span>
+                                    <span style="padding:2px 8px;font-size:0.68rem;border-radius:5px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.1);font-weight:600;">${esc(r.academic_year)}</span>
+                                </div>
+                                <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-top:4px;">By ${esc(r.uploader_name)} (${esc(r.email)}) · ${formatDate(r.uploaded_at)}</div>
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;align-items:flex-end;">
+                                <button onclick="window.__previewResource(${r.id}, ${safeTitle})" style="padding:8px 16px;font-size:0.78rem;font-weight:600;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:rgba(255,255,255,0.75);cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Preview</button>
+                                <div style="display:flex;gap:8px;">
+                                    <button onclick="window.__approveResource(${r.id})" style="padding:8px 16px;font-size:0.78rem;font-weight:600;background:rgba(99,230,211,0.15);border:1px solid rgba(99,230,211,0.3);border-radius:8px;color:#63e6d3;cursor:pointer;transition:all 0.2s;">✓ Approve</button>
+                                    <button onclick="window.__rejectResource(${r.id})" style="padding:8px 16px;font-size:0.78rem;font-weight:600;background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.2);border-radius:8px;color:#ff5050;cursor:pointer;transition:all 0.2s;">✗ Reject</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Admin comment section -->
+                        <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);">
+                            <button onclick="window.__toggleComments(${r.id})" style="padding:4px 10px;font-size:0.72rem;font-weight:600;background:none;border:1px solid rgba(255,107,53,0.25);border-radius:6px;color:#FF6B35;cursor:pointer;margin-bottom:8px;">View / Add Comments</button>
+                            <div id="admin-comments-${r.id}" hidden>
+                                <div id="admin-comments-list-${r.id}" style="max-height:160px;overflow-y:auto;margin-bottom:8px;"></div>
+                                <div style="display:flex;gap:8px;align-items:flex-start;">
+                                    <textarea id="admin-comment-input-${r.id}" rows="2" placeholder="Add feedback for the uploader..." style="flex:1;padding:8px 12px;font-size:0.8rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;resize:vertical;font-family:inherit;"></textarea>
+                                    <button onclick="window.__addComment(${r.id})" style="padding:8px 16px;font-size:0.78rem;font-weight:600;background:rgba(255,107,53,0.15);border:1px solid rgba(255,107,53,0.3);border-radius:8px;color:#FF6B35;cursor:pointer;white-space:nowrap;">Send</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                }).join("");
+            }
+
+            renderPagination(pendingPagination, pendingMeta, (nextPage) => {
+                loadPendingResources(nextPage);
+            });
+        } catch (err) { console.error("Failed to load pending resources:", err); }
+    }
+
+    async function loadLiveResources(page = 1) {
+        try {
+            const res = await fetch(`/api/admin/resources/live?page=${page}&page_size=${livePageSize}`);
+            const payload = await res.json();
+            const items = payload.items || [];
+            const meta = payload.pagination || {
+                page: page,
+                total_pages: 1,
+                has_prev: false,
+                has_next: false,
+            };
+            livePage = meta.page || page;
+
+            if (!items.length) {
+                if (liveResourcesList) liveResourcesList.innerHTML = "";
+                if (liveEmpty) liveEmpty.hidden = false;
+                renderPagination(livePagination, meta, (nextPage) => {
+                    loadLiveResources(nextPage);
+                });
+                return;
+            }
+
+            if (liveEmpty) liveEmpty.hidden = true;
+
+            items.forEach((item) => {
+                liveResourceCache[item.id] = item;
+            });
+
+            if (liveResourcesList) {
+                liveResourcesList.innerHTML = items.map((r) => {
+                    const safeTitle = JSON.stringify(r.title || "Preview").replace(/"/g, "&quot;");
+                    return `
+                    <div class="pending-resource-item" style="display:flex;flex-direction:column;gap:0;padding:18px 20px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:14px;margin-bottom:10px;">
+                        <div style="display:flex;gap:16px;align-items:center;">
+                            <div style="font-size:1.5rem;">✅</div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-weight:600;color:#fff;font-size:0.95rem;">${esc(r.title)}</div>
+                                <div style="font-size:0.82rem;color:rgba(99,230,211,0.85);margin-top:2px;">${esc(r.subject)}</div>
+                                <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+                                    <span style="padding:2px 8px;font-size:0.68rem;border-radius:5px;background:rgba(99,230,211,0.1);color:#63e6d3;border:1px solid rgba(99,230,211,0.2);font-weight:600;">${esc(r.branch)}</span>
+                                    <span style="padding:2px 8px;font-size:0.68rem;border-radius:5px;background:rgba(255,215,0,0.1);color:#ffd700;border:1px solid rgba(255,215,0,0.2);font-weight:600;">${esc(r.year_of_engineering)}</span>
+                                    <span style="padding:2px 8px;font-size:0.68rem;border-radius:5px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.1);font-weight:600;">${esc(r.academic_year)}</span>
+                                </div>
+                                <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-top:4px;">By ${esc(r.uploader_name)} (${esc(r.email)}) · ${formatDate(r.reviewed_at || r.uploaded_at)}</div>
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;align-items:flex-end;">
+                                <button onclick="window.__previewResource(${r.id}, ${safeTitle})" style="padding:8px 14px;font-size:0.76rem;font-weight:600;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:rgba(255,255,255,0.75);cursor:pointer;">Preview</button>
+                                <div style="display:flex;gap:8px;">
+                                    <button onclick="window.__editLiveResource(${r.id})" style="padding:8px 12px;font-size:0.76rem;font-weight:600;background:rgba(99,230,211,0.12);border:1px solid rgba(99,230,211,0.3);border-radius:8px;color:#63e6d3;cursor:pointer;">Edit</button>
+                                    <button onclick="window.__deleteLiveResource(${r.id})" style="padding:8px 12px;font-size:0.76rem;font-weight:600;background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.25);border-radius:8px;color:#ff5050;cursor:pointer;">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join("");
+            }
+
+            renderPagination(livePagination, meta, (nextPage) => {
+                loadLiveResources(nextPage);
+            });
+        } catch (err) {
+            console.error("Failed to load live resources:", err);
+        }
+    }
+
+    function renderPagination(container, meta, onNavigate) {
+        if (!container) return;
+        const page = Number(meta.page || 1);
+        const totalPages = Number(meta.total_pages || 1);
+        const hasPrev = Boolean(meta.has_prev);
+        const hasNext = Boolean(meta.has_next);
+
+        if (totalPages <= 1) {
+            container.innerHTML = "";
+            return;
+        }
+
+        container.innerHTML = `
+            <button data-nav="prev" ${hasPrev ? "" : "disabled"} style="padding:7px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.78);cursor:${hasPrev ? "pointer" : "not-allowed"};">Previous</button>
+            <span style="font-size:0.8rem;color:rgba(255,255,255,0.58);">Page ${page} of ${totalPages}</span>
+            <button data-nav="next" ${hasNext ? "" : "disabled"} style="padding:7px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.78);cursor:${hasNext ? "pointer" : "not-allowed"};">Next</button>
+        `;
+
+        const prevBtn = container.querySelector('button[data-nav="prev"]');
+        const nextBtn = container.querySelector('button[data-nav="next"]');
+
+        if (prevBtn && hasPrev) {
+            prevBtn.addEventListener("click", () => onNavigate(page - 1));
+        }
+        if (nextBtn && hasNext) {
+            nextBtn.addEventListener("click", () => onNavigate(page + 1));
+        }
+    }
+
+    window.__previewResource = function (id, title) {
+        const modal = document.getElementById('pdfPreviewModal');
+        const frame = document.getElementById('pdfModalFrame');
+        const titleEl = document.getElementById('pdfModalTitle');
+        if (!modal || !frame) return;
+        if (titleEl) titleEl.textContent = title || 'Preview';
+        frame.src = `/api/resources/${id}/download?preview=1`;
+        modal.hidden = false;
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.__closePdfPreview = function () {
+        const modal = document.getElementById('pdfPreviewModal');
+        const frame = document.getElementById('pdfModalFrame');
+        if (modal) modal.hidden = true;
+        if (frame) frame.src = '';
+        document.body.style.overflow = '';
+    };
+
+    window.__approveResource = async function (id) {
+        try {
+            await fetch(`/api/admin/resources/${id}/approve`, { method: "PUT" });
+            loadResourcesAdminPanel();
+        } catch (err) { console.error("Approve failed:", err); }
+    };
+
+    window.__rejectResource = async function (id) {
+        if (!confirm("Reject this resource?")) return;
+        try {
+            await fetch(`/api/admin/resources/${id}/reject`, { method: "PUT" });
+            loadResourcesAdminPanel();
+        } catch (err) { console.error("Reject failed:", err); }
+    };
+
+    window.__editLiveResource = async function (id) {
+        const resource = liveResourceCache[id];
+        if (!resource) {
+            alert("Resource details not found. Please refresh the panel.");
+            return;
+        }
+
+        const title = prompt("Title", resource.title || "");
+        if (title === null) return;
+        const subject = prompt("Subject", resource.subject || "");
+        if (subject === null) return;
+        const branch = prompt("Branch", resource.branch || "");
+        if (branch === null) return;
+        const year = prompt("Year of Engineering", resource.year_of_engineering || "");
+        if (year === null) return;
+        const academicYear = prompt("Academic Year", resource.academic_year || "");
+        if (academicYear === null) return;
+        const description = prompt("Description", resource.description || "");
+        if (description === null) return;
+
+        try {
+            const res = await fetch(`/api/admin/resources/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title: title.trim(),
+                    subject: subject.trim(),
+                    branch: branch.trim(),
+                    year_of_engineering: year.trim(),
+                    academic_year: academicYear.trim(),
+                    description: description.trim(),
+                }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                alert(data.error || "Failed to update resource.");
+                return;
+            }
+            await loadLiveResources(livePage);
+        } catch (err) {
+            console.error("Edit live resource failed:", err);
+        }
+    };
+
+    window.__deleteLiveResource = async function (id) {
+        if (!confirm("Delete this live resource? This action cannot be undone.")) return;
+        try {
+            const res = await fetch(`/api/admin/resources/${id}`, { method: "DELETE" });
+            const data = await res.json();
+            if (!res.ok) {
+                alert(data.error || "Failed to delete resource.");
+                return;
+            }
+            await loadResourcesAdminPanel();
+        } catch (err) {
+            console.error("Delete live resource failed:", err);
+        }
+    };
+
+    window.__toggleComments = async function (id) {
+        const wrap = document.getElementById(`admin-comments-${id}`);
+        if (!wrap) return;
+        if (wrap.hidden) {
+            wrap.hidden = false;
+            await __loadCommentsFor(id);
+        } else {
+            wrap.hidden = true;
+        }
+    };
+
+    async function __loadCommentsFor(id) {
+        const listEl = document.getElementById(`admin-comments-list-${id}`);
+        if (!listEl) return;
+        try {
+            const res = await fetch(`/api/admin/resources/${id}/comments`);
+            const comments = await res.json();
+            if (!comments || comments.length === 0) {
+                listEl.innerHTML = '<div style="font-size:0.78rem;color:rgba(255,255,255,0.35);padding:4px 0;">No comments yet.</div>';
+                return;
+            }
+            listEl.innerHTML = comments.map(c => {
+                const isAdmin = c.is_admin;
+                const bg = isAdmin ? 'rgba(255,107,53,0.08)' : 'rgba(99,230,211,0.08)';
+                const border = isAdmin ? 'rgba(255,107,53,0.2)' : 'rgba(99,230,211,0.2)';
+                const nameColor = isAdmin ? '#FF6B35' : '#63e6d3';
+                return `<div style="padding:8px 12px;margin-bottom:6px;background:${bg};border:1px solid ${border};border-radius:8px;">
+                    <div style="font-size:0.72rem;font-weight:600;color:${nameColor};">${esc(c.commenter_name)} ${isAdmin ? '(Admin)' : ''} · ${formatDate(c.created_at)}</div>
+                    <div style="font-size:0.82rem;color:rgba(255,255,255,0.8);margin-top:2px;">${esc(c.comment)}</div>
+                </div>`;
+            }).join('');
+        } catch (err) { console.error("Load comments failed:", err); }
+    }
+
+    window.__addComment = async function (id) {
+        const input = document.getElementById(`admin-comment-input-${id}`);
+        if (!input) return;
+        const text = input.value.trim();
+        if (!text) return;
+        try {
+            const res = await fetch(`/api/admin/resources/${id}/comment`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ comment: text })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                input.value = "";
+                await __loadCommentsFor(id);
+            } else {
+                alert(data.error || "Failed to add comment.");
+            }
+        } catch (err) { console.error("Add comment failed:", err); }
+    };
+
+    /* ── Close preview on Escape ── */
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') window.__closePdfPreview();
+    });
 
     /* ── Init ── */
     loadOverview();

@@ -2,3 +2,6 @@ flask
 python-dotenv
 PyPDF2
 python-docx
+reportlab
+requests
+youtube-transcript-api

@@ -1,0 +1,92 @@
+{
+  "courses": [
+    {
+      "id": "CS101",
+      "title": "Introduction to Computer Science",
+      "description": "Fundamentals of computer science, programming concepts, and algorithms",
+      "duration_hours": 40,
+      "level": "Beginner",
+      "instructor": "Dr. Sarah Chen",
+      "modules": [
+        {
+          "module_id": "MOD001",
+          "title": "Programming Basics",
+          "lessons": [
+            {
+              "lesson_id": "LES001",
+              "title": "Variables and Data Types",
+              "duration_minutes": 45,
+              "content_type": "video"
+            },
+            {
+              "lesson_id": "LES002",
+              "title": "Control Flow",
+              "duration_minutes": 60,
+              "content_type": "interactive"
+            }
+          ]
+        },
+        {
+          "module_id": "MOD002",
+          "title": "Functions and Modularity",
+          "lessons": [
+            {
+              "lesson_id": "LES003",
+              "title": "Function Definition",
+              "duration_minutes": 50,
+              "content_type": "video"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "WEB201",
+      "title": "Web Development Fundamentals",
+      "description": "Learn HTML, CSS, and JavaScript for modern web development",
+      "duration_hours": 60,
+      "level": "Intermediate",
+      "instructor": "John Developer",
+      "modules": [
+        {
+          "module_id": "MOD101",
+          "title": "HTML & CSS Essentials",
+          "lessons": [
+            {
+              "lesson_id": "LES101",
+              "title": "HTML Structure",
+              "duration_minutes": 45,
+              "content_type": "video"
+            },
+            {
+              "lesson_id": "LES102",
+              "title": "CSS Styling",
+              "duration_minutes": 60,
+              "content_type": "interactive"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DATA301",
+      "title": "Data Science Essentials",
+      "description": "Introduction to data analysis, visualization, and machine learning basics",
+      "duration_hours": 50,
+      "level": "Intermediate",
+      "instructor": "Dr. Alex Kumar",
+      "modules": [
+        {
+          "module_id": "MOD201",
+          "title": "Data Analysis Fundamentals",
+          "lessons": []
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "total_courses": 3,
+    "last_updated": "2026-02-28",
+    "version": "1.0"
+  }
+}

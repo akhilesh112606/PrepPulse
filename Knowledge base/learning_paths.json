@@ -1,0 +1,166 @@
+{
+  "learning_paths": [
+    {
+      "path_id": "PATH001",
+      "title": "Computer Science Foundations",
+      "description": "Complete introduction to computer science and programming fundamentals",
+      "difficulty_level": "Beginner",
+      "estimated_duration_weeks": 12,
+      "target_audience": "Aspiring programmers with no prior experience",
+      "courses": [
+        {
+          "order": 1,
+          "course_id": "CS101",
+          "title": "Introduction to Computer Science",
+          "required": true,
+          "prerequisites": []
+        }
+      ],
+      "skills_gained": [
+        "Programming Fundamentals",
+        "Algorithm Design",
+        "Problem Solving",
+        "Code Organization"
+      ],
+      "final_certification": "CERT001",
+      "success_rate": 78
+    },
+    {
+      "path_id": "PATH002",
+      "title": "Modern Web Development",
+      "description": "Master HTML, CSS, JavaScript, and build responsive web applications",
+      "difficulty_level": "Intermediate",
+      "estimated_duration_weeks": 16,
+      "target_audience": "Developers looking to build web applications",
+      "courses": [
+        {
+          "order": 1,
+          "course_id": "CS101",
+          "title": "Introduction to Computer Science",
+          "required": true,
+          "prerequisites": []
+        },
+        {
+          "order": 2,
+          "course_id": "WEB201",
+          "title": "Web Development Fundamentals",
+          "required": true,
+          "prerequisites": ["CS101"]
+        }
+      ],
+      "skills_gained": [
+        "HTML5 & CSS3",
+        "JavaScript Programming",
+        "Responsive Design",
+        "Web Performance Optimization",
+        "User Interface Design"
+      ],
+      "final_certification": "CERT002",
+      "success_rate": 82
+    },
+    {
+      "path_id": "PATH003",
+      "title": "Data Science & Analytics",
+      "description": "Learn data analysis, visualization, and introductory machine learning",
+      "difficulty_level": "Intermediate",
+      "estimated_duration_weeks": 14,
+      "target_audience": "Analytics professionals and data enthusiasts",
+      "courses": [
+        {
+          "order": 1,
+          "course_id": "CS101",
+          "title": "Introduction to Computer Science",
+          "required": true,
+          "prerequisites": []
+        },
+        {
+          "order": 2,
+          "course_id": "DATA301",
+          "title": "Data Science Essentials",
+          "required": true,
+          "prerequisites": ["CS101"]
+        }
+      ],
+      "skills_gained": [
+        "Data Analysis",
+        "Statistical Analysis",
+        "Data Visualization",
+        "Python for Data Science",
+        "Machine Learning Basics",
+        "Data-Driven Decision Making"
+      ],
+      "final_certification": "CERT003",
+      "success_rate": 75
+    },
+    {
+      "path_id": "PATH004",
+      "title": "Full Stack Developer Mastery",
+      "description": "Advanced path combining frontend and backend development skills",
+      "difficulty_level": "Advanced",
+      "estimated_duration_weeks": 24,
+      "target_audience": "Experienced developers aiming for full-stack expertise",
+      "courses": [
+        {
+          "order": 1,
+          "course_id": "CS101",
+          "title": "Introduction to Computer Science",
+          "required": true,
+          "prerequisites": []
+        },
+        {
+          "order": 2,
+          "course_id": "WEB201",
+          "title": "Web Development Fundamentals",
+          "required": true,
+          "prerequisites": ["CS101"]
+        },
+        {
+          "order": 3,
+          "course_id": "DATA301",
+          "title": "Data Science Essentials",
+          "required": false,
+          "prerequisites": ["CS101"]
+        }
+      ],
+      "skills_gained": [
+        "Full Stack Development",
+        "Database Management",
+        "API Development",
+        "Cloud Deployment",
+        "DevOps Basics",
+        "System Architecture"
+      ],
+      "final_certification": "CERT004",
+      "milestones": [
+        {
+          "milestone_id": "M001",
+          "title": "Frontend Basics Complete",
+          "position": "33%"
+        },
+        {
+          "milestone_id": "M002",
+          "title": "Backend Fundamentals Done",
+          "position": "66%"
+        },
+        {
+          "milestone_id": "M003",
+          "title": "Full Stack Project Complete",
+          "position": "100%"
+        }
+      ],
+      "success_rate": 68
+    }
+  ],
+  "progression_rules": {
+    "auto_recommend_next": true,
+    "adaptive_suggestions": true,
+    "prerequisite_enforcement": true,
+    "skill_gap_analysis": true
+  },
+  "metadata": {
+    "total_paths": 4,
+    "last_updated": "2026-02-28",
+    "version": "2.0",
+    "average_completion_rate": 75.75
+  }
+}

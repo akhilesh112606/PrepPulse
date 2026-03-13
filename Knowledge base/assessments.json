@@ -1,0 +1,85 @@
+{
+  "assessments": [
+    {
+      "assessment_id": "ASS001",
+      "course_id": "CS101",
+      "title": "Module 1 Quiz: Programming Basics",
+      "type": "quiz",
+      "difficulty": "easy",
+      "total_questions": 10,
+      "passing_score": 70,
+      "time_limit_minutes": 30,
+      "questions": [
+        {
+          "question_id": "Q001",
+          "question_text": "What is a variable in programming?",
+          "question_type": "multiple_choice",
+          "options": [
+            "A container for storing data",
+            "A type of function",
+            "A loop statement",
+            "A conditional operator"
+          ],
+          "correct_answer": 0,
+          "points": 1
+        },
+        {
+          "question_id": "Q002",
+          "question_text": "Which data type stores whole numbers?",
+          "question_type": "multiple_choice",
+          "options": [
+            "String",
+            "Integer",
+            "Boolean",
+            "Array"
+          ],
+          "correct_answer": 1,
+          "points": 1
+        }
+      ]
+    },
+    {
+      "assessment_id": "ASS002",
+      "course_id": "CS101",
+      "title": "Coding Assignment: Simple Calculator",
+      "type": "coding_assignment",
+      "difficulty": "medium",
+      "passing_score": 60,
+      "time_limit_minutes": 120,
+      "instructions": "Build a simple calculator that can perform addition, subtraction, multiplication, and division",
+      "test_cases": 5
+    },
+    {
+      "assessment_id": "ASS003",
+      "course_id": "WEB201",
+      "title": "Module 1 Project: Personal Portfolio Website",
+      "type": "project",
+      "difficulty": "medium",
+      "passing_score": 70,
+      "time_limit_minutes": 480,
+      "instructions": "Create a responsive personal portfolio website using HTML and CSS",
+      "rubric": {
+        "design": 25,
+        "functionality": 35,
+        "responsiveness": 20,
+        "code_quality": 20
+      }
+    },
+    {
+      "assessment_id": "ASS004",
+      "course_id": "DATA301",
+      "title": "Mid-term Exam: Data Analysis Concepts",
+      "type": "exam",
+      "difficulty": "hard",
+      "total_questions": 20,
+      "passing_score": 65,
+      "time_limit_minutes": 90,
+      "weighted_score": true
+    }
+  ],
+  "metadata": {
+    "total_assessments": 4,
+    "assessment_types": ["quiz", "coding_assignment", "project", "exam"],
+    "last_updated": "2026-02-28"
+  }
+}

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instant Note Maker - PrepPulse</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <style>
+        .note-maker-card {
+            width: min(1100px, 100%);
+            max-width: 1100px !important;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        
+        .note-maker-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .note-maker-grid > * {
+            min-width: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .note-maker-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .pdf-actions {
+                width: 100%;
+            }
+
+            .btn-pdf {
+                flex: 1;
+                text-align: center;
+            }
+
+            .pdf-viewer {
+                height: 380px;
+            }
+        }
+        
+        .note-form {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .note-preview {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1.5rem;
+            min-height: 400px;
+        }
+        
+        .preview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            gap: 0.75rem;
+        }
+        
+        .preview-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        
+        .preview-content {
+            max-height: 500px;
+            min-height: 280px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            font-family: ui-monospace, 'Cascadia Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.82);
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            padding-right: 0.25rem;
+        }
+
+        .preview-content pre {
+            margin: 0;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+        
+        .preview-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+        }
+        
+        .preview-empty-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .note-inline-icon {
+            width: 16px;
+            height: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.4rem;
+            vertical-align: -2px;
+        }
+
+        .btn-icon {
+            width: 14px;
+            height: 14px;
+            margin-right: 0.35rem;
+            vertical-align: -2px;
+        }
+        
+        .btn-generate {
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c5f 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        
+        .btn-generate:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.35);
+        }
+        
+        .btn-generate:disabled {
+            background: rgba(255, 255, 255, 0.2);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .pdf-preview {
+            margin-top: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        .pdf-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .pdf-info {
+            flex: 1;
+        }
+        
+        .pdf-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+        
+        .pdf-meta {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.58);
+        }
+        
+        .pdf-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn-pdf {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-download {
+            background: #ff6b35;
+            color: white;
+        }
+        
+        .btn-download:hover {
+            background: #ff7d4f;
+            transform: translateY(-1px);
+        }
+        
+        .btn-share {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: white;
+        }
+        
+        .btn-share:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+        
+        .pdf-viewer {
+            width: 100%;
+            height: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            background: white;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 0.5rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .upload-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+        
+        .upload-modal-content {
+            background: rgba(18, 18, 18, 0.95);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        
+        .upload-modal-header {
+            margin-bottom: 1.5rem;
+        }
+        
+        .upload-modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+        
+        .upload-modal-subtitle {
+            color: rgba(255, 255, 255, 0.58);
+            font-size: 0.9rem;
+        }
+        
+        .upload-modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .btn-confirm {
+            background: #ff6b35;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .btn-confirm:hover {
+            background: #ff7d4f;
+        }
+
+        .form-group select {
+            padding: 14px 16px;
+            font-size: 0.95rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            color: #ffffff;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: #FF6B35;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.12);
+        }
+
+        .form-group small {
+            color: rgba(255, 255, 255, 0.5) !important;
+        }
+
+        #word-count {
+            color: rgba(255, 255, 255, 0.58) !important;
+            white-space: nowrap;
+        }
+
+        .note-form h3 {
+            color: #ffffff !important;
+        }
+
+        .preview-empty div:last-child {
+            color: rgba(255, 255, 255, 0.45);
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-page .auth-shell {
+                padding: 72px 4vw 6vh;
+            }
+
+            .note-maker-card {
+                max-width: 100% !important;
+            }
+        }
+    </style>
+</head>
+<body class="page-fade page-fade-ready dashboard-page">
+    <main class="auth-page">
+        <spline-viewer url="https://prod.spline.design/fXcrKO8RVlhTuX6A/scene.splinecode"></spline-viewer>
+        <div class="auth-brand">PrepPulse</div>
+
+        <!-- ═══ NAVBAR ═══ -->
+        <nav class="dash-navbar">
+            <div class="dash-navbar-inner">
+                <span class="dash-nav-brand">PrepPulse</span>
+                <div class="dash-nav-links">
+                    <a href="{{ url_for('main.dashboard') }}" class="dash-nav-link" data-nav-link>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                        Skill Checklist
+                    </a>
+                    <a href="{{ url_for('main.progress_page') }}" class="dash-nav-link" data-nav-link>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14l2 2 4-4"/></svg>
+                        Progress Tracker
+                    </a>
+                    <a href="{{ url_for('main.note_maker_page') }}" class="dash-nav-link active" data-nav-link>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/><path d="M8 14l2 2 4-4"/></svg>
+                        Instant Note Maker
+                    </a>
+                    <a href="{{ url_for('main.resources_page') }}" class="dash-nav-link" data-nav-link>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="12" y2="14"/><line x1="8" y1="10" x2="16" y2="10"/></svg>
+                        Resources
+                    </a>
+                    <a href="{{ url_for('main.youtube_mindmap_page') }}" class="dash-nav-link" data-nav-link>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7.5a2.5 2.5 0 0 0-1.8-1.8C17.5 5.2 12 5.2 12 5.2s-5.5 0-7.2.5A2.5 2.5 0 0 0 3 7.5 26.6 26.6 0 0 0 2.5 12c0 1.5.2 3 .5 4.5a2.5 2.5 0 0 0 1.8 1.8c1.7.5 7.2.5 7.2.5s5.5 0 7.2-.5a2.5 2.5 0 0 0 1.8-1.8c.3-1.5.5-3 .5-4.5 0-1.5-.2-3-.5-4.5z"/><polygon points="10 15.3 15.5 12 10 8.7 10 15.3"/></svg>
+                        YT Mindmap
+                    </a>
+                </div>
+                <a href="{{ url_for('main.logout') }}" class="dash-nav-logout" title="Logout">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Logout
+                </a>
+            </div>
+        </nav>
+
+        <div class="auth-shell">
+            <section class="auth-card note-maker-card">
+                <div class="card-header">
+                    <div class="header-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            <path d="M8 14l2 2 4-4"/>
+                        </svg>
+                    </div>
+                    <div class="header-text">
+                        <p class="card-eyebrow">AI-Powered Learning</p>
+                        <h2 class="card-title">Instant Note Maker</h2>
+                        <p class="card-subtitle">Generate comprehensive study notes on any topic using AI. Preview, download, and share with the community.</p>
+                    </div>
+                </div>
+
+                <div class="note-maker-grid">
+                    <!-- Note Generation Form -->
+                    <div class="note-form">
+                        <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">
+                            <span class="note-inline-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            </span>
+                            Generate Notes
+                        </h3>
+                        
+                        <form id="note-form">
+                            <div class="form-group">
+                                <label for="subject">Subject</label>
+                                <input id="subject" name="subject" type="text" placeholder="e.g., Computer Science, Mathematics" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="topic">Topic</label>
+                                <input id="topic" name="topic" type="text" placeholder="e.g., Data Structures and Algorithms" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="pages">Number of Pages</label>
+                                <input id="pages" name="pages" type="number" min="1" max="20" value="3" required>
+                                <small style="font-size: 0.8rem; display: block; margin-top: 0.5rem;">
+                                    Approximate pages (1-20). More pages = more detailed content.
+                                </small>
+                            </div>
+                            
+                            <button type="submit" class="btn-generate" id="generate-btn">
+                                <span class="btn-text">
+                                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                                    Generate Notes
+                                </span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Status Panel -->
+                    <div class="note-preview">
+                        <div class="preview-header">
+                            <div class="preview-title">
+                                <span class="note-inline-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                </span>
+                                PDF Generation Status
+                            </div>
+                            <div id="word-count" style="font-size: 0.9rem;">0 words</div>
+                        </div>
+                        
+                        <div class="preview-content" id="preview-content">
+                            <div class="preview-empty">
+                                <div class="preview-empty-icon">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+                                </div>
+                                <div>Your preview will be shown as PDF below</div>
+                                <div style="font-size: 0.9rem; margin-top: 0.5rem;">Fill the form and click "Generate Notes" to generate and preview the PDF.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PDF Preview Section -->
+                <div class="pdf-preview hidden" id="pdf-section">
+                    <div class="pdf-header">
+                        <div class="pdf-info">
+                            <div class="pdf-title" id="pdf-title">Generated Notes</div>
+                            <div class="pdf-meta" id="pdf-meta">Ready for download and sharing</div>
+                        </div>
+                        <div class="pdf-actions">
+                            <button class="btn-pdf btn-download" id="download-btn">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                Download PDF
+                            </button>
+                            <button class="btn-pdf btn-share" id="share-btn">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>
+                                Share with Community
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <embed id="pdf-viewer" class="pdf-viewer" type="application/pdf" />
+                </div>
+            </section>
+        </div>
+
+        <!-- Upload Modal -->
+        <div class="upload-modal hidden" id="upload-modal">
+            <div class="upload-modal-content">
+                <div class="upload-modal-header">
+                    <div class="upload-modal-title">
+                        <span class="note-inline-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>
+                        </span>
+                        Share with Community
+                    </div>
+                    <div class="upload-modal-subtitle">Help other students by sharing your AI-generated notes</div>
+                </div>
+                
+                <form id="upload-form">
+                    <div class="form-group">
+                        <label for="upload-branch">Branch</label>
+                        <input id="upload-branch" name="branch" type="text" placeholder="e.g., Computer Science" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="upload-year">Year of Engineering</label>
+                        <select id="upload-year" name="year" required>
+                            <option value="">Select year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="upload-academic-year">Academic Year</label>
+                        <input id="upload-academic-year" name="academic_year" type="text" placeholder="e.g., 2023-24" required>
+                    </div>
+                </form>
+                
+                <div class="upload-modal-actions">
+                    <button class="btn-cancel" id="cancel-upload">Cancel</button>
+                    <button class="btn-confirm" id="confirm-upload">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        Upload for Approval
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="preppulse-badge">
+            <span class="live-indicator"></span>
+            <span class="badge-text">PrepPulse</span>
+        </div>
+    </main>
+
+    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.51/build/spline-viewer.js"></script>
+    <script src="{{ url_for('static', filename='js/note-maker.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/page-transition.js') }}"></script>
+</body>
+</html>

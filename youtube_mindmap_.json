@@ -1,0 +1,136 @@
+{
+  "name": "YouTube Video → Mindmap Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "YouTube to Mindmap Generator",
+        "formDescription": "Paste a YouTube video URL to generate an AI-powered mindmap",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "YouTube Video URL",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "https://www.youtube.com/watch?v=..."
+            }
+          ]
+        },
+        "options": {
+          "responseMode": "lastNode"
+        }
+      },
+      "id": "form-trigger-01",
+      "name": "① Form — Input YouTube URL",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.1,
+      "position": [160, 300],
+      "webhookId": "yt-mindmap-001"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.apify.com/v2/acts/pintostudio~youtube-transcript/run-sync-get-dataset-items?token={{$env.APIFY_API_TOKEN}}&timeout=120",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ urls: [$json['YouTube Video URL']], includeTimestamps: false, language: 'en' }) }}",
+        "options": {
+          "timeout": 120000,
+          "response": {
+            "response": {
+              "fullResponse": false,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "apify-http-02",
+      "name": "② Apify — Get YouTube Transcript",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nlet transcriptText = '';\nlet videoTitle = 'YouTube Video';\n\nfor (const item of items) {\n  const data = item.json;\n\n  // pintostudio actor returns array of {text, start, duration}\n  if (Array.isArray(data) ) {\n    transcriptText += data.map(d => d.text || d).filter(Boolean).join(' ') + ' ';\n  }\n  if (typeof data.transcript === 'string') {\n    transcriptText += data.transcript + ' ';\n  } else if (Array.isArray(data.transcript)) {\n    transcriptText += data.transcript.map(t => t.text || t).filter(Boolean).join(' ') + ' ';\n  }\n  if (Array.isArray(data.captions)) {\n    transcriptText += data.captions.map(c => c.text || c).filter(Boolean).join(' ') + ' ';\n  }\n  if (typeof data.text === 'string') {\n    transcriptText += data.text + ' ';\n  }\n  if (data.title) videoTitle = data.title;\n  if (data.videoTitle) videoTitle = data.videoTitle;\n}\n\n// Deep scan: pull all 'text' string values recursively\nif (!transcriptText.trim()) {\n  function extractText(obj) {\n    if (!obj || typeof obj !== 'object') return '';\n    let out = '';\n    for (const key of Object.keys(obj)) {\n      if (key === 'text' && typeof obj[key] === 'string') out += obj[key] + ' ';\n      else out += extractText(obj[key]);\n    }\n    return out;\n  }\n  transcriptText = items.map(i => extractText(i.json)).join(' ');\n}\n\nif (!transcriptText.trim()) {\n  throw new Error('Could not extract transcript. Check Apify actor response in previous node.');\n}\n\nconst trimmed = transcriptText.trim().substring(0, 6000);\n\nreturn [{\n  json: {\n    transcript: trimmed,\n    videoTitle,\n    youtubeUrl: $('① Form — Input YouTube URL').item.json['YouTube Video URL'],\n    charCount: trimmed.length\n  }\n}];"
+      },
+      "id": "code-extract-03",
+      "name": "③ Code — Extract Transcript",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={{$env.GEMINI_API_KEY}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [{\n    \"parts\": [{\n      \"text\": \"Analyze this YouTube video transcript and output a Mermaid mindmap.\\n\\nOUTPUT RULES (strictly follow):\\n- Output ONLY raw Mermaid syntax. No explanation, no code fences, no backticks.\\n- Line 1: mindmap\\n- Line 2: (2 spaces) root((Short Topic Name))\\n- Main branches: 4 spaces + label (no brackets)\\n- Sub-items: 6 spaces + label (no brackets)\\n- Max 5 words per node. No special chars except spaces.\\n- Create 5-6 main branches with 2-3 sub-items each.\\n\\nVIDEO TITLE: {{ $json.videoTitle }}\\nTRANSCRIPT:\\n{{ $json.transcript }}\"\n    }]\n  }],\n  \"generationConfig\": {\n    \"temperature\": 0.2,\n    \"maxOutputTokens\": 800\n  }\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "gemini-http-04",
+      "name": "④ Gemini — Generate Mindmap",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [940, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\n\nlet mermaidCode = '';\ntry {\n  mermaidCode = response.candidates[0].content.parts[0].text;\n} catch (e) {\n  throw new Error('Gemini response parse failed: ' + JSON.stringify(response).substring(0, 400));\n}\n\n// Strip any fences Gemini might add\nmermaidCode = mermaidCode\n  .replace(/```mermaid/gi, '')\n  .replace(/```/g, '')\n  .trim();\n\n// Ensure starts with mindmap\nif (!mermaidCode.toLowerCase().startsWith('mindmap')) {\n  mermaidCode = 'mindmap\\n' + mermaidCode;\n}\n\nconsole.log('Mermaid output:', mermaidCode);\n\n// Build mermaid.ink URLs\nconst base64 = Buffer.from(mermaidCode, 'utf-8').toString('base64')\n  .replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=/g, '');\n\nconst imageUrl = `https://mermaid.ink/img/${base64}?type=png&bgColor=f8f9ff`;\nconst svgUrl   = `https://mermaid.ink/svg/${base64}`;\n\n// Mermaid Live editor\nconst editorState = Buffer.from(JSON.stringify({ code: mermaidCode, mermaid: '{\"theme\":\"default\"}', autoSync: true })).toString('base64').replace(/\\+/g, '-').replace(/\\//g, '_');\nconst editorUrl = `https://mermaid.live/edit#base64:${editorState}`;\n\nconst videoTitle = $('③ Code — Extract Transcript').first().json.videoTitle;\nconst youtubeUrl = $('③ Code — Extract Transcript').first().json.youtubeUrl;\n\nreturn [{ json: { mermaidCode, imageUrl, svgUrl, editorUrl, videoTitle, youtubeUrl } }];"
+      },
+      "id": "code-build-url-05",
+      "name": "⑤ Code — Build Image URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 300]
+    }
+  ],
+  "connections": {
+    "① Form — Input YouTube URL": {
+      "main": [[{ "node": "② Apify — Get YouTube Transcript", "type": "main", "index": 0 }]]
+    },
+    "② Apify — Get YouTube Transcript": {
+      "main": [[{ "node": "③ Code — Extract Transcript", "type": "main", "index": 0 }]]
+    },
+    "③ Code — Extract Transcript": {
+      "main": [[{ "node": "④ Gemini — Generate Mindmap", "type": "main", "index": 0 }]]
+    },
+    "④ Gemini — Generate Mindmap": {
+      "main": [[{ "node": "⑤ Code — Build Image URL", "type": "main", "index": 0 }]]
+    },
+    "⑤ Code — Build Image URL": {
+      "main": [[]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "active": false,
+  "id": "youtube-mindmap-v3"
+}

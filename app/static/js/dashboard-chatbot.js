@@ -5,6 +5,37 @@
 
   if (!chatMessages || !chatInput || !chatSendBtn) return;
 
+  /* ── Load chat history on page load ── */
+  const loadChatHistory = async () => {
+    try {
+      const res = await fetch('/api/chat-history?limit=50');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.history && data.history.length > 0) {
+          // Clear the initial bot message
+          chatMessages.innerHTML = '';
+          
+          // Add all history messages
+          data.history.forEach(msg => {
+            addMessage(msg.user_message, true);
+            addMessage(msg.assistant_response, false);
+          });
+          
+          console.log(`✅ Loaded ${data.history.length} previous chat messages`);
+        }
+      }
+    } catch (err) {
+      console.error('Error loading chat history:', err);
+    }
+  };
+
+  // Load chat history when page loads
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadChatHistory);
+  } else {
+    loadChatHistory();
+  }
+
   /* ── Markdown renderer ── */
   const renderMarkdown = (value) => {
     const input = value || '';

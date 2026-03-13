@@ -1,0 +1,70 @@
+{
+  "progress_tracking": {
+    "metrics": {
+      "completion_percentage": {
+        "description": "Overall percentage of course material completed",
+        "calculation": "completed_items / total_items * 100"
+      },
+      "learning_velocity": {
+        "description": "Rate of progress through course content",
+        "unit": "lessons_per_week"
+      },
+      "time_spent": {
+        "description": "Total time invested in learning",
+        "unit": "hours"
+      },
+      "assessment_performance": {
+        "description": "Average score across all assessments",
+        "unit": "percentage"
+      },
+      "engagement_score": {
+        "description": "Measure of user engagement with platform",
+        "unit": "score_0_100"
+      },
+      "consistency_streak": {
+        "description": "Number of consecutive days learning",
+        "unit": "days"
+      }
+    },
+    "tracking_components": {
+      "lesson_progress": {
+        "tracked_fields": ["lesson_id", "completion_status", "time_spent", "timestamp"],
+        "statuses": ["not_started", "in_progress", "completed", "reviewed"]
+      },
+      "assessment_results": {
+        "tracked_fields": ["assessment_id", "score", "attempts", "time_taken", "timestamp"],
+        "score_levels": ["excellent", "good", "satisfactory", "needs_improvement"]
+      },
+      "module_progress": {
+        "tracked_fields": ["module_id", "completion_percentage", "average_score", "last_accessed"],
+        "unlocks_next_module_at": 75
+      },
+      "course_progress": {
+        "tracked_fields": ["course_id", "overall_completion", "gpa", "certificates_earned", "status"],
+        "statuses": ["not_started", "in_progress", "completed", "paused"]
+      }
+    },
+    "visualization_options": [
+      "progress_bar",
+      "pie_chart",
+      "line_graph",
+      "heatmap",
+      "skill_radar"
+    ],
+    "reporting": {
+      "daily_report": {
+        "includes": ["time_spent_today", "lessons_completed", "assessments_taken", "streak_status"]
+      },
+      "weekly_report": {
+        "includes": ["total_time", "modules_completed", "average_assessment_score", "learning_velocity"]
+      },
+      "monthly_report": {
+        "includes": ["total_hours", "courses_progress", "certifications_earned", "engagement_trends"]
+      }
+    }
+  },
+  "metadata": {
+    "last_updated": "2026-02-28",
+    "version": "1.0"
+  }
+}
